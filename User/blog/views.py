@@ -30,6 +30,21 @@ def register(request):
     else:
         return HttpResponse(status=401,content="method not allowed!")
 
+
+def profile(request):
+    if request.method != 'GET':
+        return HttpResponse(status=401, content="method not allowed!")
+    id = decode_auth_token(request.headers["token"])
+    print(id)
+    user = user = User.objects.filter(id=id)
+    if not id or len(user)==0:
+        return HttpResponse("Invalid token. Please log in again.",status=400)
+    user = user[0]
+    response_data = {'username': user.username,"password":user.password,"email":user.email,"mobile":user.mobile}
+    return HttpResponse(json.dumps(response_data), content_type="application/json", status=201)
+
+    return HttpResponse("profile ")
+
 def login(request):
     if request.method != 'GET':
         return HttpResponse(status=401, content="method not allowed!")
