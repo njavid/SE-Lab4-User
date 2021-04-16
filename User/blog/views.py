@@ -8,6 +8,28 @@ from .models import User
 
 
 
+@csrf_exempt
+def register(request):
+    if request.method == 'POST':
+        received_json_data = json.loads(request.body)
+        user = User.objects.filter(username=received_json_data["username"])
+        if len(user)!= 0:
+            return HttpResponse(status=400, content="username exists!")
+        print(received_json_data["password"])
+        user = User(
+            username = received_json_data["username"],
+            password = received_json_data["password"],
+            email = received_json_data["email"],
+            mobile = received_json_data["mobile"],
+        )
+        user.save()
+
+
+        print(request)
+        return HttpResponse("created successfully",status= 201)
+    else:
+        return HttpResponse(status=401,content="method not allowed!")
+
 def encode_auth_token( user_id):
     """
     Generates the Auth Token
