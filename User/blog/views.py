@@ -30,6 +30,33 @@ def register(request):
     else:
         return HttpResponse(status=401,content="method not allowed!")
 
+@csrf_exempt
+def update(request):
+    if request.method == 'POST':
+        id = decode_auth_token(request.headers["token"])
+        print(id)
+        user = User.objects.filter(id=id)
+        if not id or len(user) == 0:
+            return HttpResponse("Invalid token. Please log in again.", status=400)
+        user = user[0]
+        received_json_data = json.loads(request.body)
+        user2 = User.objects.filter(username=received_json_data["username"])
+        if len(user2) != 0:
+            return HttpResponse(status=400, content="username exists!")
+        if "username" in received_json_data:
+            user.username = received_json_data["username"]
+        if "password" in received_json_data:
+            user.password = received_json_data["password"]
+        if "email" in received_json_data:
+            user.email = received_json_data["email"]
+        if "mobile" in received_json_data:
+            user.mobile = received_json_data["mobile"]
+        user.save()
+        return HttpResponse( "Update successfully!", status=200)
+
+    else:
+        return HttpResponse(status=401,content="method not allowed!")
+
 
 def profile(request):
     if request.method != 'GET':
@@ -43,7 +70,6 @@ def profile(request):
     response_data = {'username': user.username,"password":user.password,"email":user.email,"mobile":user.mobile}
     return HttpResponse(json.dumps(response_data), content_type="application/json", status=201)
 
-    return HttpResponse("profile ")
 
 def login(request):
     if request.method != 'GET':
