@@ -30,6 +30,24 @@ def register(request):
     else:
         return HttpResponse(status=401,content="method not allowed!")
 
+def login(request):
+    if request.method != 'GET':
+        return HttpResponse(status=401, content="method not allowed!")
+    received_json_data = json.loads(request.body)
+    print(received_json_data["username"])
+    user = User.objects.filter(username=received_json_data["username"])
+    if len(user) == 0:
+        return HttpResponse(status=401, content="username or password is incorrect!")
+    user = user[0]
+    print(123)
+    if user.password == received_json_data["password"]:
+        auth_token = encode_auth_token(user.id)
+        response_data = {'token': auth_token.decode()}
+        return HttpResponse(json.dumps(response_data), content_type="application/json", status=200)
+
+    else:
+        return HttpResponse(status=401,content="username or password is incorrect!")
+
 def encode_auth_token( user_id):
     """
     Generates the Auth Token
