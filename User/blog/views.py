@@ -70,6 +70,18 @@ def profile(request):
     response_data = {'username': user.username,"password":user.password,"email":user.email,"mobile":user.mobile}
     return HttpResponse(json.dumps(response_data), content_type="application/json", status=201)
 
+@csrf_exempt
+def identify(request):
+    if request.method == 'POST':
+        received_json_data = json.loads(request.body)
+        if not "token" in received_json_data:
+            return HttpResponse(status=400, content="token please.")
+        token = received_json_data["token"]
+        response_data = {"id":decode_auth_token(token)}
+        return HttpResponse(json.dumps(response_data), content_type="application/json",status= 200)
+    else:
+        return HttpResponse(status=401,content="method not allowed!")
+
 
 def login(request):
     if request.method != 'GET':
